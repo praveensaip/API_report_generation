@@ -2,11 +2,11 @@ import os,requests,time
 a = os.path.join(os.path.dirname(__file__),'API report generation(1)')
 print(a)
 url = "https://api-plus-stage.anbetrack.com/core/api/v1/jobExecutions"
-token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MWU4NmRjMmM4Nzg2YjNjMjgzN2QyNCIsImZpcnN0TmFtZSI6IlByYXZlZW5rdW1hciIsImxhc3ROYW1lIjoiUyIsImVtYWlsIjoicHJhdmVlbnNhaXA5OUBnbWFpbC5jb20iLCJvcmdhbml6YXRpb24iOiJBTkIgU3lzdGVtcyIsInRlbmFudCI6IkluaG91c2VfUmVwb3J0Iiwicm9sZXMiOlsiU3VwZXJ1c2VyIl0sImxvZ2luIjoicHJhdmVlbl9JbmhvdXNlIiwicHJvZHVjdCI6ImVUcmFja1BsdXMiLCJkZWZhdWx0Um9sZSI6IlN1cGVydXNlciIsImhhc1JlcG9ydEFjY2VzcyI6ZmFsc2UsInNvdXJjZSI6InVpIiwiZW52aXJvbm1lbnQiOiJzdGFnZSIsImdyb3VwIjoicWFfdGVzdCIsImFwcGx5R2V0QWNsIjp0cnVlLCJpYXQiOjE3NDMxNDE0ODMsImV4cCI6MTc0MzE0NTY4M30.Kgod27Ght4Hh3ke_UcuBDhDk8BfL9cZNLkfF5zhOMO0"
+token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MWU4NmRjMmM4Nzg2YjNjMjgzN2QyNCIsImZpcnN0TmFtZSI6IlByYXZlZW5rdW1hciIsImxhc3ROYW1lIjoiUyIsImVtYWlsIjoicHJhdmVlbnNhaXA5OUBnbWFpbC5jb20iLCJvcmdhbml6YXRpb24iOiJBTkIgU3lzdGVtcyIsInRlbmFudCI6IkluaG91c2VfUmVwb3J0Iiwicm9sZXMiOlsiU3VwZXJ1c2VyIl0sImxvZ2luIjoicHJhdmVlbl9JbmhvdXNlIiwicHJvZHVjdCI6ImVUcmFja1BsdXMiLCJkZWZhdWx0Um9sZSI6IlN1cGVydXNlciIsImhhc1JlcG9ydEFjY2VzcyI6ZmFsc2UsInNvdXJjZSI6InVpIiwiZW52aXJvbm1lbnQiOiJzdGFnZSIsImdyb3VwIjoicWFfdGVzdCIsImFwcGx5R2V0QWNsIjp0cnVlLCJpYXQiOjE3NDMxNTA5NDcsImV4cCI6MTc0MzE1NTE0N30.BzhS0aNLEWf1BEFc24Q8HjoNAykz8bkrh3M3FFkCAbQ"
 headers={
     'Content-Type':'application/json',
-    'authorization':token
-}
+    'Authorization':token
+}    
 
 payload = {
     "job": {
@@ -122,4 +122,26 @@ execute_payload = {
 }
 
 req = requests.post(url=execute,headers=headers,json=execute_payload)
-print(req)
+while True:
+    try:
+        schedule = "https://api-plus-stage.anbetrack.com/core/api/v1/jobExecutions?q=%7B%22$and%22:[%7B%22job.type%22:%7B%22$nin%22:[%22bulkEmail%22,%22bulkImport%22]%7D,%22job.id%22:%2267e51323c94a7f570d9ebc6f%22%7D]%7D&fields=&page=1&limit=10&sort=%7B%22triggeredAt%22:-1%7D&showSystemJobs=false"
+        req = requests.get(url=schedule,headers=headers)
+        data =  req.json()
+        response = data['records'][0]
+        status = response['status']  
+        print("status ---->", status) 
+        if status.lower() == "completed":
+            print("completed successfully")
+            break
+        elif status.lower() == "completed - with errors":
+            print("status is not completed")
+            break
+        
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        break
+
+    except KeyError as key:
+        print(f"Key error: {key}")
+        break
+print("executed successfully")
